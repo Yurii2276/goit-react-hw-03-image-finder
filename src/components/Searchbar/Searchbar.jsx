@@ -20,8 +20,7 @@ export default class Searchbar extends Component {
   };
 
   render() {
-    const { onChange } = this.props;
-
+   
     return (
         <header className={css.Searchbar}>
         <form className={css.SearchForm} onSubmit={this.handleSearchSubmit}>
