@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import React, { Component } from 'react';
 
 import css from './App.module.css';
 
@@ -30,7 +30,6 @@ export class App extends Component {
         pictures: pictures,
         maxPage: Math.ceil(pictures.totalHits / 12),
       });
-      
     } catch (error) {
       this.setState({ error: error.message });
     } finally {
@@ -39,20 +38,41 @@ export class App extends Component {
   };
 
   componentDidUpdate(_, prevState) {
-    if (prevState.picThemSearch !== this.state.picThemSearch) {
+    if (
+      (prevState.picThemSearch !== this.state.picThemSearch) &
+      (this.state.picThemSearch !== null)
+    ) {
       this.LoadThemOfPictures();
     }
   }
 
   handleSubmitInput = inputData => {
-    this.setState({ picThemSearch: inputData });
+    this.setState({
+      picThemSearch: inputData,
+      page: 1,
+      maxPage: null,
+      pictures: null,
+    });
 
-    console.log(this.state.page, this.state.maxPage);
+    if (this.state.picThemSearch) {
+      this.setState({
+        picThemSearch: null,
+        page: 1,
+        maxPage: null,
+        pictures: null,
+      });
+
+      if (inputData === '') {
+        this.setState({
+          pictures: null,
+          loadMore: false,
+        });
+      }
+    }
   };
 
   handleLoadMore = async () => {
     try {
-      console.log('натиснули кнопку ЛОАДМОРЕ');
       const nextPage = this.state.page + 1;
       this.setState({ isLoading: true });
 
@@ -60,10 +80,8 @@ export class App extends Component {
         this.state.picThemSearch,
         nextPage
       );
-      console.log('новий массив----- ', newPictures);
 
       const addPictures = [...this.state.pictures.hits, ...newPictures.hits];
-      console.log('збшльшення массиву ', addPictures);
 
       this.setState({ pictures: { hits: addPictures }, page: nextPage });
     } catch (error) {
@@ -74,7 +92,6 @@ export class App extends Component {
   };
 
   handleImageClick = imageURL => {
-    console.log(`Клікнули на зображенні з URL: ${imageURL}`);
     this.setState({ selectedImage: imageURL, showModal: true });
     document.body.style.overflow = 'hidden';
   };
@@ -84,20 +101,24 @@ export class App extends Component {
     document.body.style.overflow = 'auto';
   };
 
-
   render() {
     return (
       <div>
         <Searchbar onData={this.handleSubmitInput} />
-        <Loader visible={this.state.isLoading} />
 
         {this.state.error && <p className={css.error}>{this.state.error}</p>}
 
         {this.state.picThemSearch && (
-          <ImageGallery pictures={this.state.pictures} onImageClick={this.handleImageClick}/>
+          <ImageGallery
+            pictures={this.state.pictures}
+            onImageClick={this.handleImageClick}
+          />
         )}
 
-        <Loader visible={this.state.isLoading} />
+        <Loader
+          visible={this.state.isLoading}
+          className={css.galleryContainer}
+        />
 
         {this.state.page < this.state.maxPage && !this.state.loadMore && (
           <Button
@@ -106,8 +127,12 @@ export class App extends Component {
           />
         )}
 
-        {this.state.showModal && (<Modal image={this.state.selectedImage}
-            onRequestClose={this.handleModalClose}/>)}
+        {this.state.showModal && (
+          <Modal
+            image={this.state.selectedImage}
+            onRequestClose={this.handleModalClose}
+          />
+        )}
       </div>
     );
   }
