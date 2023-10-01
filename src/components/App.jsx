@@ -38,10 +38,8 @@ export class App extends Component {
   };
 
   componentDidUpdate(_, prevState) {
-    if (
-      (prevState.picThemSearch !== this.state.picThemSearch) &
-      (this.state.picThemSearch !== null)
-    ) {
+    if (prevState.picThemSearch !== this.state.picThemSearch || 
+      prevState.page !== this.state.page) {
       this.LoadThemOfPictures();
     }
   }
@@ -50,25 +48,27 @@ export class App extends Component {
     this.setState({
       picThemSearch: inputData,
       page: 1,
-      maxPage: null,
-      pictures: null,
+      // maxPage: null,
+      // pictures: null,
     });
 
-    if (this.state.picThemSearch) {
-      this.setState({
-        picThemSearch: null,
-        page: 1,
-        maxPage: null,
-        pictures: null,
-      });
+    // if (this.state.picThemSearch) {
+    //   this.setState({
+    //     // isLoading: false,
+    //     // picThemSearch: null,
+    //     // page: 1,
+    //     // maxPage: null,
+    //     // pictures: null,
+    //   })};
 
-      if (inputData === '') {
-        this.setState({
-          pictures: null,
-          loadMore: false,
-        });
-      }
-    }
+      // if (inputData === "") {
+      //   this.setState({
+      //     picThemSearch: null,
+      //     page: 1,
+      //     maxPage: null,
+      //     pictures: null,
+      //   })};
+
   };
 
   handleLoadMore = async () => {
@@ -80,8 +80,10 @@ export class App extends Component {
         this.state.picThemSearch,
         nextPage
       );
-
+      console.log('new get array', newPictures);
+      
       const addPictures = [...this.state.pictures.hits, ...newPictures.hits];
+      console.log('symmarni array', addPictures);
 
       this.setState({ pictures: { hits: addPictures }, page: nextPage });
     } catch (error) {
