@@ -25,11 +25,20 @@ export class App extends Component {
   LoadThemOfPictures = async () => {
     try {
       this.setState({ isLoading: true });
-      const pictures = await findPictures(this.state.picThemSearch);
-      this.setState({
-        pictures: pictures,
-        maxPage: Math.ceil(pictures.totalHits / 12),
-      });
+      const newPictures = await findPictures(
+        this.state.picThemSearch,
+        this.state.page
+      );
+
+      if (this.state.pictures) {
+        const addPictures = [...this.state.pictures.hits, ...newPictures.hits];
+        this.setState({ pictures: { hits: addPictures } });
+      } else {
+        this.setState({
+          pictures: newPictures,
+          maxPage: Math.ceil(newPictures.totalHits / 12),
+        });
+      }
     } catch (error) {
       this.setState({ error: error.message });
     } finally {
@@ -38,8 +47,10 @@ export class App extends Component {
   };
 
   componentDidUpdate(_, prevState) {
-    if (prevState.picThemSearch !== this.state.picThemSearch || 
-      prevState.page !== this.state.page) {
+    if (
+      prevState.picThemSearch !== this.state.picThemSearch ||
+      prevState.page !== this.state.page
+    ) {
       this.LoadThemOfPictures();
     }
   }
@@ -48,49 +59,13 @@ export class App extends Component {
     this.setState({
       picThemSearch: inputData,
       page: 1,
-      // maxPage: null,
-      // pictures: null,
+      pictures: null,
     });
-
-    // if (this.state.picThemSearch) {
-    //   this.setState({
-    //     // isLoading: false,
-    //     // picThemSearch: null,
-    //     // page: 1,
-    //     // maxPage: null,
-    //     // pictures: null,
-    //   })};
-
-      // if (inputData === "") {
-      //   this.setState({
-      //     picThemSearch: null,
-      //     page: 1,
-      //     maxPage: null,
-      //     pictures: null,
-      //   })};
-
   };
 
   handleLoadMore = async () => {
-    try {
-      const nextPage = this.state.page + 1;
-      this.setState({ isLoading: true });
-
-      const newPictures = await findPictures(
-        this.state.picThemSearch,
-        nextPage
-      );
-      console.log('new get array', newPictures);
-      
-      const addPictures = [...this.state.pictures.hits, ...newPictures.hits];
-      console.log('symmarni array', addPictures);
-
-      this.setState({ pictures: { hits: addPictures }, page: nextPage });
-    } catch (error) {
-      this.setState({ error: error.message });
-    } finally {
-      this.setState({ isLoading: false });
-    }
+    const nextPage = this.state.page + 1;
+    this.setState({ page: nextPage });
   };
 
   handleImageClick = imageURL => {
